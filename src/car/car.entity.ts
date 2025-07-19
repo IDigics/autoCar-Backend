@@ -19,15 +19,15 @@ export class Car {
   id: number;
 
   @Column()
-  milage: number;
+  mileage: number;  
 
-  @ManyToOne(() => Brand, (brand) => brand.cars)
+  @ManyToOne(() => Brand, (brand) => brand.cars, { eager: true })
   brand: Brand;
 
   @Column()
   model: string;
 
-  @ManyToOne(() => FuelType, (fuel) => fuel.cars)
+  @ManyToOne(() => FuelType, (fuel) => fuel.cars, { eager: true })
   fuelType: FuelType;
 
   @Column()
@@ -54,16 +54,16 @@ export class Car {
   @Column()
   seats: number;
 
-  @Column()
+  @Column({ nullable: true })
   previousOwner: number;
 
   @Column()
   color: string;
 
-  @ManyToOne(() => Category, (cat) => cat.cars)
+  @ManyToOne(() => Category, (cat) => cat.cars, { eager: true })
   category: Category;
 
-  @ManyToOne(() => SubCategory, (sub) => sub.cars)
+  @ManyToOne(() => SubCategory, (sub) => sub.cars, { eager: true })
   subCategory: SubCategory;
 
   @OneToMany(() => CarImage, (img) => img.car)
@@ -75,3 +75,4 @@ export class Car {
   @OneToMany(() => Recommendation, (rec) => rec.car)
   recommendations: Recommendation[];
 }
+
