@@ -1,8 +1,10 @@
-import { Module } from '@nestjs/common';
+import { Module,Logger } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+
+
 
 import { CarModule } from './car/car.module';
 import { BrandModule } from './brand/brand.module';
@@ -16,7 +18,8 @@ import { RecommendedCarModule } from './recommended-car/recommended-car.module';
 import { ImportModule } from './import/import.module';
 
 @Module({
-  imports: [ ConfigModule.forRoot({ isGlobal: true }), // Loads .env globally
+  imports: [ 
+  ConfigModule.forRoot({ isGlobal: true }),
   TypeOrmModule.forRootAsync({
     imports: [ConfigModule],
     inject: [ConfigService],
@@ -27,10 +30,20 @@ import { ImportModule } from './import/import.module';
       username: config.get<string>('DB_USERNAME'),
       password: config.get<string>('DB_PASSWORD'),
       database: config.get<string>('DB_NAME'),
-      synchronize: true,
+      synchronize: true, //in prod it go flase
       autoLoadEntities: true,
+    })
     }),
-  }), CarModule, BrandModule, CategoryModule, SubCategoryModule, FuelTypeModule, CarImageModule, ReviewModule, RecommendationModule, RecommendedCarModule, ImportModule,
+    CarModule,
+    BrandModule, 
+    CategoryModule, 
+    SubCategoryModule, 
+    FuelTypeModule, 
+    CarImageModule, 
+    ReviewModule, 
+    RecommendationModule, 
+    RecommendedCarModule, 
+    ImportModule,
   ],
   controllers: [AppController],
   providers: [AppService],

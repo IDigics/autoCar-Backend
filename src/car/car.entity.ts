@@ -60,6 +60,10 @@ export class Car {
   @Column()
   color: string;
 
+  @Column({ type: 'float', default: 0 })
+  averageReviewScore: number;
+
+
   @ManyToOne(() => Category, (cat) => cat.cars, { eager: true })
   category: Category;
 
