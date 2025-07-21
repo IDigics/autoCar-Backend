@@ -88,7 +88,7 @@ export class ImportService {
         fuelType: fuel,
         gear: row.gear,
         offerType: row.offerType,
-        price: parseFloat(row.price),
+        price: parseInt(row.price),
         horsePower: parseInt(row['horse power']),
         year: parseInt(row.year),
         engineSize: parseFloat(row['engine size']),
@@ -117,4 +117,21 @@ private readCsv(filePath: string): Promise<any[]> {
       .on('error', (error) => reject(error));
   });
 }
+async getMinMaxPrice(): Promise<{ minPrice: number; maxPrice: number }> {
+  const min = await this.carRepo
+    .createQueryBuilder('car')
+    .select('MIN(car.price)', 'min')
+    .getRawOne();
+
+  const max = await this.carRepo
+    .createQueryBuilder('car')
+    .select('MAX(car.price)', 'max')
+    .getRawOne();
+
+  return {
+    minPrice: parseInt(min.min),
+    maxPrice: parseInt(max.max),
+  };
+}
+
   }

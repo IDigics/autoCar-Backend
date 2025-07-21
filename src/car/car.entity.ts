@@ -36,7 +36,7 @@ export class Car {
   @Column()
   offerType: string;
 
-  @Column('float')
+  @Column('int')
   price: number;
 
   @Column('int')
