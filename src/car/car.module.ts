@@ -1,4 +1,3 @@
-import { CacheModule } from '@nestjs/cache-manager';
 
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -8,8 +7,7 @@ import { CarController } from './car.controller';
 
 @Module({
   imports: [
-    CacheModule.register(),
-    TypeOrmModule.forFeature([Car])],
+  TypeOrmModule.forFeature([Car])],
   providers: [CarService],
   controllers: [CarController],
 })
