@@ -166,5 +166,12 @@ export class ImportService {
 
     console.log(`✅ Added ${carImages.length} car images`);
   }
-
+  async setAllImagesToMain(): Promise<void> {
+    await this.carImageRepo
+      .createQueryBuilder()
+      .update(CarImage)
+      .set({ type: 'main' })
+      .execute();
+      console.log('All car images updated to type = main');
+  }
 }

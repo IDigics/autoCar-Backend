@@ -70,7 +70,7 @@ export class Car {
   @ManyToOne(() => SubCategory, (sub) => sub.cars, { eager: true })
   subCategory: SubCategory;
 
-  @OneToMany(() => CarImage, (img) => img.car)
+  @OneToMany(() => CarImage, (image) => image.car, { cascade: true })
   images: CarImage[];
 
   @OneToMany(() => Review, (rev) => rev.car)

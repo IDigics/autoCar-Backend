@@ -23,6 +23,7 @@ export class CarService {
       order: this.buildSort(sort),
       take: pageSize,
       skip: (page - 1) * pageSize,
+      relations: ['images'],
     });
 
     return {

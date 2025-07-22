@@ -19,4 +19,9 @@ export class ImportController {
   async seedDefaultImages() {
     return this.importService.assignDefaultImagesByBrand();
   }
+  @Post('setmain')
+  async setImagesToMain() {
+    await this.importService.setAllImagesToMain();
+    return { message: 'All car images updated to main' };
+  }
 }
