@@ -20,4 +20,23 @@ export class CarImageService {
 
     return filename;
   }
+
+  async processAndSaveImages(files: Express.Multer.File[]): Promise<string[]> {
+    await fs.mkdir(this.uploadFolder, { recursive: true });
+
+    const filenames: string[] = [];
+
+    for (const file of files) {
+      const filename = `${uuidv4()}.webp`;
+      const filepath = path.join(this.uploadFolder, filename);
+
+      await sharp(file.buffer)
+        .webp({ quality: 80 })
+        .toFile(filepath);
+
+      filenames.push(filename);
+    }
+
+    return filenames;
+  }
 }
