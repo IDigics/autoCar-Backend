@@ -6,6 +6,15 @@ import { CarFilterDto } from './dto/car-filter.dto';
 export class CarController {
   constructor(private readonly carService: CarService) {}
 
+    @Get('minmaxprice')
+    async getMinMaxPrice() {
+    return this.carService.getMinMaxPrice();
+    }
+
+    @Get(':id')
+  async getCarById(@Param('id', ParseIntPipe) id: number) {
+  return this.carService.getCarById(id);
+  }
   @Get()
   @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
   async getCars(@Query() filters: CarFilterDto) {
@@ -37,12 +46,6 @@ export class CarController {
     // Call service method with filters, pagination and sorting
     return this.carService.getCars(filterObject, sort, page, pageSize);
   }
-  @Get(':id')
-  async getCarById(@Param('id', ParseIntPipe) id: number) {
-  return this.carService.getCarById(id);
-  }
-  @Get('minmaxprice')
-    async getMinMaxPrice() {
-    return this.carService.getMinMaxPrice();
-    }
+  
+
 }
