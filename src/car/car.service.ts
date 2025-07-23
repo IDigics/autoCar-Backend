@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 import { Car } from './car.entity';
@@ -21,7 +21,7 @@ export class CarService {
     private imageService: CarImageService,
   ) {}
 
- async getCars(
+  async getCars(
   filters: Record<string, any>,
   sort: string,
   page: number,
@@ -102,7 +102,28 @@ export class CarService {
     }
   }
 
-async createCar(
+  async getCarById(id: number) {
+  const car = await this.carRepo.findOne({
+    where: { id },
+    relations: ['brand', 'category', 'subCategory', 'fuelType', 'images'],
+  });
+
+  if (!car) {
+    throw new NotFoundException(`Car with ID ${id} not found`);
+  }
+
+  const { images, ...carWithoutImages } = car;
+  const [mainImage, ...secondaryImages] = images;
+
+  return {
+    ...carWithoutImages,
+    mainImage,
+    secondaryImages,
+  };
+  }
+
+
+  async createCar(
     carDto: any,
     mainImage: Express.Multer.File,
     secondaryImages: Express.Multer.File[],

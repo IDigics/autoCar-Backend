@@ -1,4 +1,4 @@
-import { Controller, Get, Query, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Controller, Get, Param, ParseIntPipe, Query, UsePipes, ValidationPipe } from '@nestjs/common';
 import { CarService } from './car.service';
 import { CarFilterDto } from './dto/car-filter.dto';
 
@@ -35,7 +35,10 @@ export class CarController {
     // Call service method with filters, pagination and sorting
     return this.carService.getCars(filterObject, sort, page, pageSize);
   }
-
+  @Get(':id')
+  async getCarById(@Param('id', ParseIntPipe) id: number) {
+  return this.carService.getCarById(id);
+  }
   @Get('minmaxprice')
     async getMinMaxPrice() {
     return this.carService.getMinMaxPrice();
