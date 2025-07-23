@@ -1,4 +1,4 @@
-import { IsOptional, IsNumber, Min, Max, IsIn } from 'class-validator';
+import { IsOptional, IsNumber, Min, Max, IsIn, IsString } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class CarFilterDto {
@@ -12,4 +12,5 @@ export class CarFilterDto {
   sort?: string;
   @IsOptional()@Type(() => Number)@IsNumber()@Min(1)page?: number;
   @IsOptional()@Type(() => Number)@IsNumber()@Min(1)@Max(100)pageSize?: number;
+  @IsOptional() @IsString() search?: string;
 }

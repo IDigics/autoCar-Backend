@@ -1,6 +1,6 @@
 import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Between, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
+import { Between, ILike, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 import { Car } from './car.entity';
 import { Brand } from '../brand/brand.entity';
 import { Category } from '../category/category.entity';
@@ -70,14 +70,23 @@ export class CarService {
   if (filters.category !== undefined) where.category = { id: filters.category };
   if (filters.subCategory !== undefined) where.subCategory = { id: filters.subCategory };
   if (filters.fuelType !== undefined) where.fuelType = { id: filters.fuelType };
-
+  
   if (filters.minPrice !== undefined && filters.maxPrice !== undefined) {
-    // Corrected here:
     where.price = Between(filters.minPrice, filters.maxPrice);
   } else if (filters.minPrice !== undefined) {
     where.price = MoreThanOrEqual(filters.minPrice);
   } else if (filters.maxPrice !== undefined) {
     where.price = LessThanOrEqual(filters.maxPrice);
+  }
+
+  if (filters.search) {
+    const search = `%${filters.search}%`;
+
+    return [
+      { ...where, model: ILike(search) },
+      { ...where, brand: { ...where.brand, name: ILike(search) } },
+      { ...where, category: { ...where.category, name: ILike(search) } },
+    ];
   }
 
   return where;

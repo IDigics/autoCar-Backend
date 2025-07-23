@@ -20,6 +20,7 @@ export class CarController {
       sort = 'id_asc',
       page = 1,
       pageSize = 10,
+      search,
     } = filters;
 
     // Build filter object dynamically, skipping undefined/null values
@@ -30,6 +31,7 @@ export class CarController {
       ...(category !== undefined && category !== null && { category }),
       ...(subCategory !== undefined && subCategory !== null && { subCategory }),
       ...(fuelType !== undefined && fuelType !== null && { fuelType }),
+      ...(search && { search }),
     };
 
     // Call service method with filters, pagination and sorting
