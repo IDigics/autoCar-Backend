@@ -1,6 +1,6 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
+import { Between, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 import { Car } from './car.entity';
 import { Brand } from '../brand/brand.entity';
 import { Category } from '../category/category.entity';
@@ -64,27 +64,24 @@ export class CarService {
 
 
   private buildWhere(filters: Record<string, any>) {
-    const where: Record<string, any> = {};
+  const where: Record<string, any> = {};
 
-    if (filters.brand !== undefined) where.brand = { id: filters.brand };
-    if (filters.category !== undefined) where.category = { id: filters.category };
-    if (filters.subCategory !== undefined) where.subCategory = { id: filters.subCategory };
-    if (filters.fuelType !== undefined) where.fuelType = { id: filters.fuelType };
+  if (filters.brand !== undefined) where.brand = { id: filters.brand };
+  if (filters.category !== undefined) where.category = { id: filters.category };
+  if (filters.subCategory !== undefined) where.subCategory = { id: filters.subCategory };
+  if (filters.fuelType !== undefined) where.fuelType = { id: filters.fuelType };
 
-    if (filters.minPrice !== undefined && filters.maxPrice !== undefined) {
-      // Add range support
-      where.price = {
-        ...(filters.minPrice !== undefined && { $gte: filters.minPrice }),
-        ...(filters.maxPrice !== undefined && { $lte: filters.maxPrice }),
-      };
-    } else if (filters.minPrice !== undefined) {
-      where.price = MoreThanOrEqual(filters.minPrice);
-    } else if (filters.maxPrice !== undefined) {
-      where.price = LessThanOrEqual(filters.maxPrice);
-    }
-
-    return where;
+  if (filters.minPrice !== undefined && filters.maxPrice !== undefined) {
+    // Corrected here:
+    where.price = Between(filters.minPrice, filters.maxPrice);
+  } else if (filters.minPrice !== undefined) {
+    where.price = MoreThanOrEqual(filters.minPrice);
+  } else if (filters.maxPrice !== undefined) {
+    where.price = LessThanOrEqual(filters.maxPrice);
   }
+
+  return where;
+}
 
   private buildSort(sort: string): { [P in keyof Car]?: 'ASC' | 'DESC' } {
     switch (sort) {
@@ -96,9 +93,9 @@ export class CarService {
         return { year: 'ASC' };
       case 'year_desc':
         return { year: 'DESC' };
-      case 'review_score_asc':
+      case 'review_asc':
         return { averageReviewScore: 'ASC' };
-      case 'review_score_desc':
+      case 'review_desc':
         return { averageReviewScore: 'DESC' };
       default:
         return { id: 'ASC' };

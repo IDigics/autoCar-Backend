@@ -30,10 +30,10 @@ export class Car {
   @ManyToOne(() => FuelType, (fuel) => fuel.cars, { eager: true })
   fuelType: FuelType;
 
-  @Column({ type: 'enum', enum: ['Automatic', 'Manual']})
+  @Column({ type: 'enum', enum: ['Automatic', 'Manual'],default:'Manual'})
   gear: 'Automatic'| 'Manual';
 
-  @Column({ type: 'enum', enum: ['new', 'used']})
+  @Column({ type: 'enum', enum: ['new', 'used'],default:"new"})
   offerType:'new'| 'used';
 
   @Column('int')
