@@ -36,7 +36,7 @@ export class Car {
   @Column()
   offerType: string;
 
-  @Column('float')
+  @Column('int')
   price: number;
 
   @Column('int')
@@ -59,6 +59,10 @@ export class Car {
 
   @Column()
   color: string;
+
+  @Column({ type: 'float', default: 0 })
+  averageReviewScore: number;
+
 
   @ManyToOne(() => Category, (cat) => cat.cars, { eager: true })
   category: Category;

@@ -10,4 +10,9 @@ export class ImportController {
     const cars=await this.importService.importData('carDataset.csv');
     return cars;
   }
+  @Get('minmaxprice')
+async getMinMaxPrice() {
+  return this.importService.getMinMaxPrice();
+}
+
 }
