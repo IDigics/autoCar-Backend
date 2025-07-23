@@ -191,4 +191,21 @@ async createCar(
   async deleteCar(id: number) {
     return this.carRepo.delete(id);
   }
+
+  async getMinMaxPrice(): Promise<{ minPrice: number; maxPrice: number }> {
+    const min = await this.carRepo
+      .createQueryBuilder('car')
+      .select('MIN(car.price)', 'min')
+      .getRawOne();
+
+    const max = await this.carRepo
+      .createQueryBuilder('car')
+      .select('MAX(car.price)', 'max')
+      .getRawOne();
+
+    return {
+      minPrice: parseInt(min.min),
+      maxPrice: parseInt(max.max),
+    };
+  }
 }

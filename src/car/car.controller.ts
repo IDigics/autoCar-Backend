@@ -35,4 +35,9 @@ export class CarController {
     // Call service method with filters, pagination and sorting
     return this.carService.getCars(filterObject, sort, page, pageSize);
   }
+
+  @Get('minmaxprice')
+    async getMinMaxPrice() {
+    return this.carService.getMinMaxPrice();
+    }
 }

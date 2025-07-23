@@ -117,23 +117,6 @@ export class ImportService {
     });
   }
 
-  async getMinMaxPrice(): Promise<{ minPrice: number; maxPrice: number }> {
-    const min = await this.carRepo
-      .createQueryBuilder('car')
-      .select('MIN(car.price)', 'min')
-      .getRawOne();
-
-    const max = await this.carRepo
-      .createQueryBuilder('car')
-      .select('MAX(car.price)', 'max')
-      .getRawOne();
-
-    return {
-      minPrice: parseInt(min.min),
-      maxPrice: parseInt(max.max),
-    };
-  }
-
   async assignDefaultImagesByBrand() {
     const brandImageMap = {
       1: 'e87f2473-6c2b-4d55-ac06-0925ee1120dd.webp',
