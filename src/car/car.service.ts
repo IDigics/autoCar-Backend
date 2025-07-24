@@ -1,16 +1,25 @@
 import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, ILike, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
+
 import { Car } from './car.entity';
 import { Brand } from '../brand/brand.entity';
 import { Category } from '../category/category.entity';
 import { SubCategory } from '../sub-category/sub-category.entity';
 import { FuelType } from '../fuel-type/fuel-type.entity';
 import { CarImage } from '../car-image/car-image.entity';
+
 import { CarImageService } from '../car-image/car-image.service';
+
+import { CreateCarDto } from './dto/create-car.dto';
+import { UpdateCarDto } from './dto/update-car.dto';
 
 @Injectable()
 export class CarService {
+  updateCar(id: string, updateCarDto: UpdateCarDto, arg2: Express.Multer.File | undefined, secondaryImages: Express.Multer.File[] | undefined) {
+    throw new Error('Method not implemented.');
+  }
+  carImageService: any;
   constructor(
     @InjectRepository(Car) private carRepo: Repository<Car>,
     @InjectRepository(Brand) private brandRepo: Repository<Brand>,
@@ -133,91 +142,79 @@ export class CarService {
 
 
   async createCar(
-    carDto: any,
-    mainImage: Express.Multer.File,
-    secondaryImages: Express.Multer.File[],
-  ): Promise<Car> {
-    // 1. Create or get Brand
-    let brand = await this.brandRepo.findOneBy({ name: carDto.brand });
-    if (!brand) {
-      brand = this.brandRepo.create({ name: carDto.brand });
-      await this.brandRepo.save(brand);
-    }
+  carDto: CreateCarDto,
+  mainImage?: Express.Multer.File,
+  secondaryImages?: Express.Multer.File[],
+): Promise<Car> {
+  // 1. Validate existing relations
+  const brand = await this.brandRepo.findOneBy({ name: carDto.brand });
+  if (!brand) throw new BadRequestException('Invalid brand');
 
-    // 2. get Category
-    let category = await this.categoryRepo.findOneBy({ name: carDto.category });
-    if (!category)throw new BadRequestException ('Invalid category');
+  const category = await this.categoryRepo.findOneBy({ name: carDto.category });
+  if (!category) throw new BadRequestException('Invalid category');
 
-    // 3. get SubCategory
-    let subCategory = await this.subCategoryRepo.findOneBy({ name: carDto.subCategory });
-    if (!subCategory) throw new BadRequestException ('Invalid sub-category');
+  const subCategory = await this.subCategoryRepo.findOneBy({ name: carDto.subCategory });
+  if (!subCategory) throw new BadRequestException('Invalid sub-category');
 
-    // 4. Get Fuel Type
-    const fuelType = await this.fuelRepo.findOneBy({ type: carDto.fuelType });
-    if (!fuelType) throw new BadRequestException('Invalid fuel type');
+  const fuelType = await this.fuelRepo.findOneBy({ type: carDto.fuelType });
+  if (!fuelType) throw new BadRequestException('Invalid fuel type');
 
-    // 5. Handle offerType logic
-    const isNew = carDto.offerType.toLowerCase() === 'new';
+  // 2. Handle offerType logic
+  const isNew = carDto.offerType.toLowerCase() === 'new';
+  const mileage = isNew ? 0 : carDto.mileage ?? 0;
+  const previousOwner = isNew ? 0 : carDto.previousOwner ?? 0;
 
-    const mileage = isNew ? 0 : parseInt(carDto.mileage);
-    const previousOwner = isNew ? 0 : parseInt(carDto.previousOwner);
+  // 3. Handle image upload or default image
+  const mainImageName = mainImage
+    ? await this.carImageService.processAndSaveImage(mainImage)
+    : 'noimage.webp';
 
-    // 6. Handle image upload
-    const imageEntities: CarImage[] = [];
+  const imageEntities: CarImage[] = [];
 
-    // a. Main image
-    if (mainImage) {
-      const filename = await this.imageService.processAndSaveImage(mainImage);
+  // Add main image entity
+  imageEntities.push(
+    this.imageRepo.create({
+      url: mainImageName,
+      type: 'main',
+    }),
+  );
+
+  // Add secondary images if any
+  if (secondaryImages && secondaryImages.length > 0) {
+    const secondaryFilenames = await this.carImageService.processAndSaveImages(secondaryImages);
+    secondaryFilenames.forEach((filename) => {
       imageEntities.push(
         this.imageRepo.create({
           url: filename,
-          type: 'main',
+          type: 'secondary',
         }),
       );
-    }
-
-    // b. Secondary images
-    if (secondaryImages && secondaryImages.length > 0) {
-      const filenames = await this.imageService.processAndSaveImages(secondaryImages);
-      filenames.forEach((name) => {
-        imageEntities.push(
-          this.imageRepo.create({
-            url: name,
-            type: 'secondary',
-          }),
-        );
-      });
-    }
-
-    // 7. Create the car
-    const car = this.carRepo.create({
-      mileage,
-      previousOwner,
-      brand,
-      model: carDto.model,
-      fuelType,
-      gear: carDto.gear,
-      offerType: carDto.offerType,
-      price: parseInt(carDto.price),
-      horsePower: parseInt(carDto.horsePower),
-      year: parseInt(carDto.year),
-      engineSize: parseFloat(carDto.engineSize),
-      doors: parseInt(carDto.doors),
-      seats: parseInt(carDto.seats),
-      color: carDto.color,
-      category,
-      subCategory,
-      images: imageEntities,
     });
-
-    return await this.carRepo.save(car);
-  } 
-
-  async updateCar(id: number, updateDto: any) {
-    await this.carRepo.update(id, updateDto);
-    return this.carRepo.findOneBy({ id });
   }
 
+  const car = this.carRepo.create({
+    brand,
+    category,
+    subCategory,
+    fuelType,
+    mileage,
+    previousOwner,
+    model: carDto.model,
+    gear: carDto.gear,
+    offerType: carDto.offerType,
+    price: carDto.price,
+    horsePower: carDto.horsePower,
+    year: carDto.year,
+    engineSize: carDto.engineSize,
+    doors: carDto.doors,
+    seats: carDto.seats,
+    color: carDto.color,
+    images: imageEntities,
+  });
+
+  return this.carRepo.save(car);
+}
+ 
   async deleteCar(id: number) {
     return this.carRepo.delete(id);
   }
