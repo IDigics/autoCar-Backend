@@ -12,7 +12,7 @@ services:
       POSTGRES_DB: autocar
     volumes:
       - pgdata:/var/lib/postgresql/data
-      - ./initdb:/docker-entrypoint-initdb.d
+      - ./initdb:/docker-entrypoint-initdb.d:Z
     ports:
       - "5433:5432"
     healthcheck:
