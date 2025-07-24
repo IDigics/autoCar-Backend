@@ -21,6 +21,33 @@
   <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
   [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
+
+## To run the code 
+
+```bash
+docker-compose down -v && docker-compose up --build
+```
+
+this commande will run the contianer in the watch mode so u can see the terminal of the containers
+
+
+or u can use detached mode 
+
+
+```bash
+docker-compose down -v && docker-compose up --build -d
+```
+
+and if want to delete the containers just use the :
+
+
+```bash
+docker-compose down -v 
+```
+
+
+if and error comes up just re-run the command or just call the it dude(dev-OPS) request a ticket and have fun btw ths code is running on the prod mode so its lighter 
+
 ## Description
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
