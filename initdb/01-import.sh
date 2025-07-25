@@ -13,7 +13,7 @@ while ! psql -U admin -d autocar -c "SELECT 1" >/dev/null 2>&1; do
 done
 
 # Import dump if exists
-if [ -f "/docker-entrypoint-initdb.d/dump.sql" ]; then
+if [ -f "/docker-entrypoint-initdb.d/dump.sql.bak" ]; then
   echo "Importing database dump..."
-  psql -v ON_ERROR_STOP=1 -U admin -d autocar -f /docker-entrypoint-initdb.d/dump.sql
+  psql -v ON_ERROR_STOP=1 -U admin -d autocar -f /docker-entrypoint-initdb.d/dump.sql.bak
 fi
