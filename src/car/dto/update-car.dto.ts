@@ -1,17 +1,49 @@
-import { IsBoolean, IsInt, IsOptional, IsString } from "class-validator";
+import {IsOptional,IsString,IsInt,IsBoolean,IsArray,IsEnum,IsNumber,} from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class UpdateCarDto {
-  @IsOptional() @IsString() model?: string;
-  @IsOptional() @IsString() brand?: string;
-  @IsOptional() @IsInt() mileage?: number;
-  @IsOptional() @IsInt() previousOwner?: number;
-  @IsOptional() @IsString() offerType?: string;
+  @IsOptional() @IsString() 
+  model?: string;
+  @IsOptional() @IsEnum(['Automatic', 'Manual']) 
+  gear?: 'Automatic' | 'Manual';
+  @IsOptional() @IsEnum(['new', 'used']) 
+  offerType?: 'new' | 'used';
+  @IsOptional() @Type(() => Number) @IsInt() 
+  price?: number;
+  @IsOptional() @Type(() => Number) @IsInt() 
+  horsePower?: number;
+  @IsOptional() @Type(() => Number) @IsInt() 
+  year?: number;
+  @IsOptional() @Type(() => Number) @IsNumber() 
+  engineSize?: number;
+  @IsOptional() @Type(() => Number) @IsInt() 
+  doors?: number;
+  @IsOptional() @Type(() => Number) @IsInt() 
+  seats?: number;
+  @IsOptional() @IsString() 
+  color?: string;
+  @IsOptional() @Type(() => Number) @IsInt() 
+  mileage?: number;
+  @IsOptional() @Type(() => Number) @IsInt() 
+  previousOwner?: number;
 
-  @IsOptional() @IsInt() categoryId?: number;
-  @IsOptional() @IsInt() subCategoryId?: number;
-  @IsOptional() @IsInt() fuelTypeId?: number;
+  //FKs will used with a dropdown in front flow :get brands,fuel,category,subcategory ou pickchanges
+  @IsOptional() @Type(() => Number) @IsInt() 
+  brandId?: number;
+  @IsOptional() @Type(() => Number) @IsInt() 
+  fuelTypeId?: number;
+  @IsOptional() @Type(() => Number) @IsInt() 
+  categoryId?: number;
+  @IsOptional() @Type(() => Number) @IsInt() 
+  subCategoryId?: number;
 
-  @IsOptional() @IsBoolean() removeMainImage?: boolean;
+  //images update DTO
+  @IsOptional() @IsBoolean() 
+  removeMainImage?: boolean;
 
-  @IsOptional() deletedImageIds?: number[];
+  @IsOptional() @Type(() => Number) @IsInt()
+  promotedImageId?: number;
+
+  @IsOptional() @IsArray()@Type(() => Number)@IsInt({ each: true })
+  deletedImageIds?: number[];
 }

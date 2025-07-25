@@ -21,25 +21,49 @@ export class CarController {
     }
 
   @Post()
-@UsePipes(new ValidationPipe({ whitelist: true }))
-@UseInterceptors(
-  FileFieldsInterceptor([
-    { name: 'mainImage', maxCount: 1 },
-    { name: 'secondaryImages', maxCount: 10 },
-  ]),
-)
-async createCar(
-  @Body() carDto: CreateCarDto,
-  @UploadedFiles()
-  files: {
-    mainImage?: Express.Multer.File[];
-    secondaryImages?: Express.Multer.File[];
-  },
-) {
-  const mainImage = files.mainImage?.[0];
-  const secondaryImages = files.secondaryImages || [];
-  return this.carService.createCar(carDto, mainImage, secondaryImages);
-}
+  @UsePipes(new ValidationPipe({ whitelist: true }))
+  @UseInterceptors(
+    FileFieldsInterceptor([
+      { name: 'mainImage', maxCount: 1 },
+      { name: 'secondaryImages', maxCount: 10 },
+    ]),
+  )
+  async createCar(
+    @Body() carDto: CreateCarDto,
+    @UploadedFiles()
+    files: {
+      mainImage?: Express.Multer.File[];
+      secondaryImages?: Express.Multer.File[];
+    },
+  ) {
+    const mainImage = files.mainImage?.[0];
+    const secondaryImages = files.secondaryImages || [];
+    return this.carService.createCar(carDto, mainImage, secondaryImages);
+  }
+
+  @Put('update/:id')
+  @UseInterceptors(
+    FileFieldsInterceptor([
+      { name: 'mainImageFile', maxCount: 1 },
+      { name: 'secondaryImageFiles', maxCount: 10 },
+    ])
+  )
+  updateCar(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateCarDto,
+    @UploadedFiles()
+    files: {
+      mainImageFile?: Express.Multer.File[];
+      secondaryImageFiles?: Express.Multer.File[];
+    }
+  ) {
+    return this.carService.updateCar(
+      id,
+      dto,
+      files?.mainImageFile?.[0],
+      files?.secondaryImageFiles || []
+    );
+  }
 
   @Get()
     @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
