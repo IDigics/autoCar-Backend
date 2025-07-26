@@ -871,7 +871,7 @@ COPY public.car (id, mileage, model, price, "horsePower", year, "engineSize", do
 398	34242	GLC	57845	259	2005	4.2	4	4	3	White	0	6	3	2	3	Manual	new
 399	0	RAV4	63929	281	2024	4.1	2	7	0	Gray	0	9	3	2	4	Manual	new
 400	0	Rogue	25894	274	2025	2.9	4	4	0	White	0	10	1	4	5	Manual	new
-1	41579	Focus	53382	86	2012	1.1	2	4	1	Silver	0	1	1	1	1	Manual	new
+1	41579	Focus	53382	86	2012	1.1	2	4	1	Silver	3.5	1	1	1	1	Manual	new
 \.
 
 
@@ -1329,11 +1329,8 @@ COPY public.recommended_car (id, "recommendationId", "carId") FROM stdin;
 --
 
 COPY public.review (id, email, score, comment, "carId") FROM stdin;
-1	user@example.com	4	Great car! Smooth ride and excellent fuel efficiency.	1
-2	user@idigics.com	5	Noice	1
-3	user@idigics.com	5	Noice	2
-4	user@idigics.com	5	Noice	2
-5	user@example.com	4	Great car! Smooth ride and excellent fuel efficiency.	2
+7	user@example.com	4	Great car! Smooth ride and excellent fuel efficiency.	1
+8	user@idigics.com	3	noice	1
 \.
 
 
@@ -1403,7 +1400,7 @@ SELECT pg_catalog.setval('public.recommended_car_id_seq', 1, false);
 -- Name: review_id_seq; Type: SEQUENCE SET; Schema: public; Owner: admin
 --
 
-SELECT pg_catalog.setval('public.review_id_seq', 5, true);
+SELECT pg_catalog.setval('public.review_id_seq', 8, true);
 
 
 --
