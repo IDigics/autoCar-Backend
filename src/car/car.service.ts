@@ -1,6 +1,8 @@
 import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, ILike, In, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
+import * as path from 'path';
+import * as fs from 'fs/promises';
 
 import { Car } from './car.entity';
 import { Brand } from '../brand/brand.entity';
@@ -100,9 +102,10 @@ export class CarService {
       carDto.previousOwner,
     );
 
-    const mainImageName = mainImage
-      ? await this.imageService.processAndSaveImage(mainImage)
-      : 'noimage.webp';
+    if (!mainImage) {
+      throw new BadRequestException('Main image is required');
+    }
+    const mainImageName = await this.imageService.processAndSaveImage(mainImage);
 
     const imageEntities: CarImage[] = [
       this.imageRepo.create({ url: mainImageName, type: 'main' }),
@@ -138,112 +141,76 @@ export class CarService {
   return this.carRepo.save(car);
   }
 
- // car.service.ts
-  async updateCar(id: number, dto: UpdateCarDto, mainImageFile?: Express.Multer.File, secondaryImageFiles?: Express.Multer.File[]) {
-    const car = await this.carRepo.findOne({
-      where: { id },
-      relations: ['images'],
-    });
-    if (!car) throw new NotFoundException('Car not found');
-
-    // --- 1. Update basic fields from dto
-    Object.assign(car, dto);
-
-    // --- 2. Update related FKs
-    if (dto.brandId) car.brand = { id: dto.brandId } as any;
-    if (dto.fuelTypeId) car.fuelType = { id: dto.fuelTypeId } as any;
-    if (dto.categoryId) car.category = { id: dto.categoryId } as any;
-    if (dto.subCategoryId) car.subCategory = { id: dto.subCategoryId } as any;
-
-    // --- 3. Handle deleting secondary images
-    if (dto.deletedImageIds?.length) {
-      await this.imageRepo.delete({
-        id: In(dto.deletedImageIds),
-        car: { id },
-        type: 'secondary',
+  async updateCar(id: number,dto: UpdateCarDto,mainImageFile?: Express.Multer.File,
+    secondaryImageFiles?: Express.Multer.File[],): Promise<Car> {
+      const car = await this.carRepo.findOne({
+        where: { id },
+        relations: ['images'],
       });
-    }
+      if (!car) throw new NotFoundException('Car not found');
 
-    // --- 4. Upload secondary images
-    if (secondaryImageFiles?.length) {
-      for (const file of secondaryImageFiles) {
-        const url = await this.imageService.processAndSaveImage(file);
-        const newImg = this.imageRepo.create({ url, type: 'secondary', car });
-        await this.imageRepo.save(newImg);
+      // --- 1. Update basic fields from dto
+      Object.assign(car, dto);
+
+      // --- 2. Update related FKs
+      if (dto.brandId) car.brand = { id: dto.brandId } as any;
+      if (dto.fuelTypeId) car.fuelType = { id: dto.fuelTypeId } as any;
+      if (dto.categoryId) car.category = { id: dto.categoryId } as any;
+      if (dto.subCategoryId) car.subCategory = { id: dto.subCategoryId } as any;
+
+      // --- 3. Handle deleting secondary images
+      if (dto.deletedImageIds?.length) {
+        await this.imageRepo.delete({
+          id: In(dto.deletedImageIds),
+          car: { id },
+          type: 'secondary',
+        });
       }
-    }
 
-    // --- 5. Promote image to main (optional)
-    if (dto.promotedImageId) {
-      const imageToPromote = car.images.find((img) => img.id === dto.promotedImageId);
-      if (imageToPromote) {
-        // Demote old main if exists
+      // --- 4. Upload new secondary images
+      if (secondaryImageFiles?.length) {
+        const filenames = await this.imageService.processAndSaveImages(secondaryImageFiles);
+        const newImages = filenames.map((url) =>
+          this.imageRepo.create({ url, type: 'secondary', car }),
+        );
+      await this.imageRepo.save(newImages); // batch save
+      }
+
+      // --- 5. Upload new main image (replaces old one)
+      if (mainImageFile) {
         const currentMain = car.images.find((img) => img.type === 'main');
         if (currentMain) {
-          if (dto.removeMainImage ?? true) {
-            await this.imageRepo.remove(currentMain);
-          } else {
-            currentMain.type = 'secondary';
-            await this.imageRepo.save(currentMain);
-          }
-        }
-        // Promote new one
-        imageToPromote.type = 'main';
-        await this.imageRepo.save(imageToPromote);
-      }
-    }
-
-    // --- 6. Upload new main image (optional)
-    if (mainImageFile) {
-      const currentMain = car.images.find((img) => img.type === 'main');
-      if (currentMain) {
-        if (dto.removeMainImage ?? true) {
           await this.imageRepo.remove(currentMain);
-        } else {
-          currentMain.type = 'secondary';
-          await this.imageRepo.save(currentMain);
         }
+        const mainUrl = await this.imageService.processAndSaveImage(mainImageFile);
+        const newMain = this.imageRepo.create({ url: mainUrl, type: 'main', car });
+        await this.imageRepo.save(newMain);
       }
-      const mainUrl = await this.imageService.processAndSaveImage(mainImageFile);
-      const newMain = this.imageRepo.create({ url: mainUrl, type: 'main', car });
-      await this.imageRepo.save(newMain);
+
+      // --- 6. Save updated car
+      return await this.carRepo.save(car);
     }
 
-    // --- 7. Delete main image directly (with fallback logic)
-    if (dto.removeMainImage && !mainImageFile && !dto.promotedImageId) {
-      const currentMain = car.images.find((img) => img.type === 'main');
-      if (currentMain && !currentMain.url.includes('noimage.webp')) {
-        await this.imageRepo.remove(currentMain);
 
-        // Fallback logic
-        const updatedCarImages = await this.imageRepo.find({
-          where: { car: { id }, type: 'secondary' },
-          order: { id: 'ASC' },
-        });
+  async deleteCar(id: number): Promise<void> {
+      const car = await this.carRepo.findOne({
+        where: { id },
+        relations: ['images'],
+      });
 
-        let fallbackUrl = 'noimage.webp';
-        if (updatedCarImages.length) {
-          const fallbackImg = updatedCarImages[0];
-          fallbackImg.type = 'main';
-          await this.imageRepo.save(fallbackImg);
-          fallbackUrl = fallbackImg.url;
-        } else {
-          const defaultImg = this.imageRepo.create({
-            url: 'noimage.webp',
-            type: 'main',
-            car,
-          });
-          await this.imageRepo.save(defaultImg);
-        }
+      if (!car) throw new NotFoundException('Car not found');
+
+      // Delete image files from disk
+      for (const image of car.images) {
+        const filePath = path.join(this.imageService.uploadFolder, image.url);
+        await fs.unlink(filePath).catch(() => null); // ignore error if file missing
       }
-    }
 
-    // --- 8. Save updated car
-    return await this.carRepo.save(car);
-  }
+      // Delete images from DB
+      await this.imageRepo.delete({ car: { id } });
 
-  async deleteCar(id: number) {
-    return this.carRepo.delete(id);
+      // Delete the car itself
+      await this.carRepo.delete(id);
   }
 
   private buildWhere(filters: Record<string, any>) {

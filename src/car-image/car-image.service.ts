@@ -1,12 +1,17 @@
 import { Injectable } from '@nestjs/common';
-import * as sharp from 'sharp';
-import { promises as fs } from 'fs';
+import { ConfigService } from '@nestjs/config';
+import * as fs from 'fs/promises';
 import * as path from 'path';
+import * as sharp from 'sharp';
 import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class CarImageService {
-  private uploadFolder = process.env.UPLOAD_FOLDER || 'uploads';
+  public readonly uploadFolder: string;
+
+  constructor(private configService: ConfigService) {
+    this.uploadFolder = this.configService.get<string>('UPLOAD_FOLDER') || 'uploads';
+  }
 
   async processAndSaveImage(file: Express.Multer.File): Promise<string> {
     await fs.mkdir(this.uploadFolder, { recursive: true });
