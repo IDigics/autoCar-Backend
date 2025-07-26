@@ -4,12 +4,14 @@ import { Review } from './review.entity';
 import { Repository } from 'typeorm';
 import { CreateReviewDto } from './dto/review.dto';
 import { Car } from '../car/car.entity';
+import { CarService } from 'src/car/car.service';
 
 @Injectable()
 export class ReviewService {
   constructor(
     @InjectRepository(Review) private reviewRepo: Repository<Review>,
     @InjectRepository(Car) private carRepo: Repository<Car>,
+    private readonly carService: CarService,
   ) {}
 
 
@@ -31,6 +33,7 @@ export class ReviewService {
         comment: createReviewDto.comment,
     });
     await this.reviewRepo.save(review);
+    await this.carService.updateAverageScore(carId);
     return { message: 'Review created successfully' };
     }
 

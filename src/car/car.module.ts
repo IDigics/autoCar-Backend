@@ -7,23 +7,15 @@ import { Category } from 'src/category/category.entity';
 import { SubCategory } from 'src/sub-category/sub-category.entity';
 import { FuelType } from 'src/fuel-type/fuel-type.entity';
 import { CarImage } from 'src/car-image/car-image.entity';
+import { Review } from 'src/review/review.entity';
 import { Brand } from 'src/brand/brand.entity';
-import { BrandModule } from 'src/brand/brand.module';
 import { CarImageService } from 'src/car-image/car-image.service';
 
+
 @Module({
-imports: [
-    TypeOrmModule.forFeature([
-      Car,
-      Category,
-      SubCategory,
-      FuelType,
-      CarImage,
-      Brand,
-    ]),
-    BrandModule,
-  ],
+imports: [TypeOrmModule.forFeature([Car,Category,SubCategory,FuelType,CarImage,Brand,Review,])],
   providers: [CarService,CarImageService],
   controllers: [CarController],
+  exports: [CarService],
 })
 export class CarModule {}

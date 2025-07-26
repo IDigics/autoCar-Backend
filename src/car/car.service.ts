@@ -10,6 +10,8 @@ import { Category } from '../category/category.entity';
 import { SubCategory } from '../sub-category/sub-category.entity';
 import { FuelType } from '../fuel-type/fuel-type.entity';
 import { CarImage } from '../car-image/car-image.entity';
+import { Review } from 'src/review/review.entity';
+
 
 import { CarImageService } from '../car-image/car-image.service';
 
@@ -25,6 +27,8 @@ export class CarService {
     @InjectRepository(SubCategory) private subCategoryRepo: Repository<SubCategory>,
     @InjectRepository(FuelType) private fuelRepo: Repository<FuelType>,
     @InjectRepository(CarImage) private imageRepo: Repository<CarImage>,
+    @InjectRepository(Review) private reviewRepo: Repository<Review>,  // <-- Add this line
+
     private imageService: CarImageService,
   ) {}
 
@@ -209,7 +213,6 @@ export class CarService {
       return {message: 'Car updated successfully'};
 }
 
-
   async deleteCar(id: number): Promise<void> {
       const car = await this.carRepo.findOne({
         where: { id },
@@ -343,4 +346,15 @@ export class CarService {
     };
   }
 
+  async updateAverageScore(carId: number): Promise<void> {
+  const reviews = await this.reviewRepo.find({ where: { car: { id: carId } } });
+  const totalScore = reviews.reduce((sum, r) => sum + r.score, 0);
+  const avgScore = reviews.length ? totalScore / reviews.length : 0;
+
+  const car = await this.carRepo.findOne({ where: { id: carId } });
+  if (!car) throw new NotFoundException('Car not found');
+
+  car.averageReviewScore = parseFloat(avgScore.toFixed(2));
+  await this.carRepo.save(car);
+}
 }
