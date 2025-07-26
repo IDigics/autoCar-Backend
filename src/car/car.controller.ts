@@ -1,7 +1,7 @@
-import { Body, Controller, Delete, Get, NotFoundException, Param, ParseIntPipe, Post, Put, Query, UploadedFile, UploadedFiles, UseInterceptors, UsePipes, ValidationPipe } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, NotFoundException, Param, ParseIntPipe, Post, Put, Query, UploadedFile, UploadedFiles, UseInterceptors, UsePipes, ValidationPipe } from '@nestjs/common';
 import { CarService } from './car.service';
 import { CarFilterDto } from './dto/car-filter.dto';
-import { FileFieldsInterceptor, FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
+import {FileFieldsInterceptor,FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { CreateCarDto } from './dto/create-car.dto';
 import { UpdateCarDto } from './dto/update-car.dto';
 
@@ -21,34 +21,49 @@ export class CarController {
     }
 
   @Post()
-    @UseInterceptors(
-      FileInterceptor('mainImage'),
-      FilesInterceptor('secondaryImages'),
-    )
-    async createCar(
-      @Body() carDto: CreateCarDto,
-      @UploadedFile() mainImage: Express.Multer.File,
-      @UploadedFiles() secondaryImages: Express.Multer.File[],
-    ) {
-      if (!mainImage) {
-        throw new NotFoundException('Main image is required');
-      }
-      return this.carService.createCar(carDto, mainImage, secondaryImages);
+  @UseInterceptors(
+    FileFieldsInterceptor([
+      { name: 'mainImage', maxCount: 1 },
+      { name: 'secondaryImages', maxCount: 10 },
+    ]),
+  )
+  async createCar(
+    @Body() carDto: CreateCarDto,
+    @UploadedFiles()
+    files: {
+      mainImage?: Express.Multer.File[],
+      secondaryImages?: Express.Multer.File[],
+    },
+  ) {
+    const mainImage = files.mainImage?.[0];
+    if (!mainImage) {
+      throw new BadRequestException('Main image is required');
     }
+    const secondaryImages = files.secondaryImages || [];
+    await this.carService.createCar(carDto, mainImage, secondaryImages);
+    return { message: 'Car created successfully' };
+  }
 
 
   @Put(':id')
   @UseInterceptors(
-    FileInterceptor('mainImage'),
-    FilesInterceptor('secondaryImages'),
+    FileFieldsInterceptor([
+      { name: 'mainImage', maxCount: 1 },
+      { name: 'secondaryImages', maxCount: 10 },
+    ]),
   )
   async updateCar(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() updateDto: UpdateCarDto,
-    @UploadedFile() mainImage: Express.Multer.File,
-    @UploadedFiles() secondaryImages: Express.Multer.File[],
+    @Param('id') id: string,
+    @Body() dto: UpdateCarDto,
+    @UploadedFiles() files: {
+      mainImage?: Express.Multer.File[],
+      secondaryImages?: Express.Multer.File[],
+    },
   ) {
-    return this.carService.updateCar(id, updateDto, mainImage, secondaryImages);
+    const mainImage = files.mainImage?.[0];
+    const secondaryImages = files.secondaryImages || [];
+
+    return this.carService.updateCar(+id, dto, mainImage, secondaryImages);
   }
 
   @Delete(':id')

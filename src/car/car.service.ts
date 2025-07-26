@@ -102,11 +102,7 @@ export class CarService {
   };
   }
 
-  async createCar(
-    carDto: CreateCarDto,
-    mainImage?: Express.Multer.File,
-    secondaryImages?: Express.Multer.File[],
-  ): Promise<Car> {
+  async createCar(carDto: CreateCarDto,mainImage?: Express.Multer.File,secondaryImages?: Express.Multer.File[]) {
     const { brand, category, subCategory, fuelType } = await this.validateRelations(carDto);
 
     const { mileage, previousOwner } = this.getMileageAndPreviousOwner(
@@ -151,27 +147,29 @@ export class CarService {
       images: imageEntities,
     });
 
-  return this.carRepo.save(car);
+  await this.carRepo.save(car);
   }
 
-  async updateCar(id: number,dto: UpdateCarDto,mainImageFile?: Express.Multer.File,
-    secondaryImageFiles?: Express.Multer.File[],): Promise<Car> {
+  async updateCar(id: number,dto: UpdateCarDto,mainImageFile?: Express.Multer.File,secondaryImageFiles?: Express.Multer.File[],) {
       const car = await this.carRepo.findOne({
         where: { id },
         relations: ['images'],
       });
       if (!car) throw new NotFoundException('Car not found');
 
-      // --- 1. Update basic fields from dto
+      // Update simple fields
       Object.assign(car, dto);
 
-      // --- 2. Update related FKs
+      // Update relations
       if (dto.brandId) car.brand = { id: dto.brandId } as any;
       if (dto.fuelTypeId) car.fuelType = { id: dto.fuelTypeId } as any;
       if (dto.categoryId) car.category = { id: dto.categoryId } as any;
       if (dto.subCategoryId) car.subCategory = { id: dto.subCategoryId } as any;
 
-      // --- 3. Handle deleting secondary images
+      // ✅ Save the car first to ensure valid reference for images
+      await this.carRepo.save(car);
+
+      // Delete specified secondary images
       if (dto.deletedImageIds?.length) {
         await this.imageRepo.delete({
           id: In(dto.deletedImageIds),
@@ -180,29 +178,36 @@ export class CarService {
         });
       }
 
-      // --- 4. Upload new secondary images
+      // Add new secondary images
       if (secondaryImageFiles?.length) {
-        const filenames = await this.imageService.processAndSaveImages(secondaryImageFiles);
-        const newImages = filenames.map((url) =>
-          this.imageRepo.create({ url, type: 'secondary', car }),
-        );
-      await this.imageRepo.save(newImages); // batch save
+        for (const file of secondaryImageFiles) {
+          const url = await this.imageService.processAndSaveImage(file);
+          const newImg = this.imageRepo.create({
+            url,
+            type: 'secondary',
+            car, // or: car: { id: car.id } as any
+          });
+          await this.imageRepo.save(newImg);
+        }
       }
 
-      // --- 5. Upload new main image (replaces old one)
+      // Replace main image
       if (mainImageFile) {
-        const currentMain = car.images.find((img) => img.type === 'main');
+        const currentMain = car.images.find(img => img.type === 'main');
         if (currentMain) {
           await this.imageRepo.remove(currentMain);
         }
         const mainUrl = await this.imageService.processAndSaveImage(mainImageFile);
-        const newMain = this.imageRepo.create({ url: mainUrl, type: 'main', car });
+        const newMain = this.imageRepo.create({
+          url: mainUrl,
+          type: 'main',
+          car,
+        });
         await this.imageRepo.save(newMain);
       }
 
-      // --- 6. Save updated car
-      return await this.carRepo.save(car);
-    }
+      return {message: 'Car updated successfully'};
+}
 
 
   async deleteCar(id: number): Promise<void> {

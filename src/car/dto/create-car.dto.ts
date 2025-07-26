@@ -1,5 +1,6 @@
 import { Type } from 'class-transformer';
 import {IsString,IsEnum,IsInt,IsNumber,IsOptional,} from 'class-validator';
+import { IsDefined } from 'class-validator';
 
 export class CreateCarDto {
   @IsString() model: string;
@@ -16,12 +17,12 @@ export class CreateCarDto {
   @IsOptional() @IsInt() previousOwner?: number;
 
    //FKs will used with a dropdown in front flow :get brands,fuel,category,subcategory ou pickchanges
-  @Type(() => Number) @IsInt() 
-  brandId?: number;
-  @Type(() => Number) @IsInt() 
-  fuelTypeId?: number;
-  @Type(() => Number) @IsInt() 
-  categoryId?: number;
-  @Type(() => Number) @IsInt() 
-  subCategoryId?: number;
+  @IsDefined()@Type(() => Number) @IsInt() 
+  brandId: number;
+  @IsDefined()@Type(() => Number) @IsInt() 
+  fuelTypeId: number;
+  @IsDefined()@Type(() => Number) @IsInt() 
+  categoryId: number;
+ @IsDefined()@Type(() => Number) @IsInt() 
+  subCategoryId: number;
 }
