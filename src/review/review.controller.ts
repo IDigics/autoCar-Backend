@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Param, Body, ParseIntPipe, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Controller, Post, Get, Param, Body, Query, ParseIntPipe, UsePipes, ValidationPipe } from '@nestjs/common';
 import { ReviewService } from './review.service';
 import { CreateReviewDto } from './dto/review.dto';
 
@@ -16,7 +16,10 @@ export class ReviewController {
   }
 
   @Get()
-  async getReviews(@Param('carId', ParseIntPipe) carId: number) {
-    return this.reviewService.getReviewsByCarId(carId);
+  async getReviews(
+    @Param('carId', ParseIntPipe) carId: number,
+    @Query('limit', ParseIntPipe) limit = 10 
+  ) {
+    return this.reviewService.getReviewsByCarId(carId, limit);
   }
 }

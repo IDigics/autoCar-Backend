@@ -36,11 +36,16 @@ export class ReviewService {
 
 
     
-  async getReviewsByCarId(carId: number): Promise<Review[]> {
-    const car = await this.carRepo.findOne({ where: { id: carId }, relations: ['reviews'] });
+  async getReviewsByCarId(carId: number, limit: number): Promise<Review[]> {
+    const car = await this.carRepo.findOne({ where: { id: carId } });
     if (!car) {
       throw new NotFoundException(`Car with id ${carId} not found`);
     }
-    return this.reviewRepo.find({ where: { car: { id: carId } } });
+
+    return this.reviewRepo.find({
+      where: { car: { id: carId } },
+      take: limit,
+      order: { id: 'DESC' },
+    });
   }
 }
