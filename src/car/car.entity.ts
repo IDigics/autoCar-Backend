@@ -30,11 +30,11 @@ export class Car {
   @ManyToOne(() => FuelType, (fuel) => fuel.cars, { eager: true })
   fuelType: FuelType;
 
-  @Column()
-  gear: string;
+  @Column({ type: 'enum', enum: ['Automatic', 'Manual'],default:'Manual'})
+  gear: 'Automatic'| 'Manual';
 
-  @Column()
-  offerType: string;
+  @Column({ type: 'enum', enum: ['new', 'used'],default:"new"})
+  offerType:'new'| 'used';
 
   @Column('int')
   price: number;
@@ -70,7 +70,7 @@ export class Car {
   @ManyToOne(() => SubCategory, (sub) => sub.cars, { eager: true })
   subCategory: SubCategory;
 
-  @OneToMany(() => CarImage, (img) => img.car)
+  @OneToMany(() => CarImage, (image) => image.car, { cascade: true })
   images: CarImage[];
 
   @OneToMany(() => Review, (rev) => rev.car)

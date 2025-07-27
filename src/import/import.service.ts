@@ -8,6 +8,7 @@ import { Brand } from '../brand/brand.entity';
 import { Category } from '../category/category.entity';
 import { SubCategory } from '../sub-category/sub-category.entity';
 import { FuelType } from '../fuel-type/fuel-type.entity';
+import { CarImage } from '../car-image/car-image.entity'; 
 
 @Injectable()
 export class ImportService {
@@ -17,12 +18,12 @@ export class ImportService {
     @InjectRepository(Category) private categoryRepo: Repository<Category>,
     @InjectRepository(SubCategory) private subCategoryRepo: Repository<SubCategory>,
     @InjectRepository(FuelType) private fuelTypeRepo: Repository<FuelType>,
+    @InjectRepository(CarImage) private carImageRepo: Repository<CarImage>, 
   ) {}
 
   async importData(filePath: string): Promise<{ importedCount: number }> {
     const rows = await this.readCsv(filePath);
 
-    // 1. Extract unique related data
     const uniqueBrands = new Set<string>();
     const uniqueFuels = new Set<string>();
     const uniqueCategories = new Set<string>();
@@ -35,7 +36,6 @@ export class ImportService {
       uniqueSubCategories.add(row.subcategory.trim());
     }
 
-    // 2. Insert related entities if not exists
     for (const brandName of uniqueBrands) {
       let brand = await this.brandRepo.findOne({ where: { name: brandName } });
       if (!brand) {
@@ -68,7 +68,6 @@ export class ImportService {
       }
     }
 
-    // 3. Import cars with proper relations
     let importedCount = 0;
     for (const row of rows) {
       const brand = await this.brandRepo.findOne({ where: { name: row.brand.trim() } });
@@ -77,13 +76,13 @@ export class ImportService {
       const subCategory = await this.subCategoryRepo.findOne({ where: { name: row.subcategory.trim() } });
 
       if (!brand || !fuel || !category || !subCategory) {
-        console.log(`Skipping row id ${row.id} because related entity is missing.`);
-        continue; // skip or handle error
+        console.log(`Skipping row id ${row.id} due to missing relation`);
+        continue;
       }
 
       const car = this.carRepo.create({
         mileage: Number(row.mileage || 0),
-        brand: brand,
+        brand,
         model: row.model,
         fuelType: fuel,
         gear: row.gear,
@@ -96,8 +95,8 @@ export class ImportService {
         seats: parseInt(row.seats),
         previousOwner: parseInt(row['previous owner']),
         color: row.color,
-        category: category,
-        subCategory: subCategory,
+        category,
+        subCategory,
       });
 
       await this.carRepo.save(car);
@@ -107,31 +106,55 @@ export class ImportService {
     return { importedCount };
   }
 
-private readCsv(filePath: string): Promise<any[]> {
-  return new Promise((resolve, reject) => {
-    const results: any[] = []; 
-    fs.createReadStream(filePath)
-      .pipe(csvParser())
-      .on('data', (data) => results.push(data))
-      .on('end', () => resolve(results))
-      .on('error', (error) => reject(error));
-  });
-}
-async getMinMaxPrice(): Promise<{ minPrice: number; maxPrice: number }> {
-  const min = await this.carRepo
-    .createQueryBuilder('car')
-    .select('MIN(car.price)', 'min')
-    .getRawOne();
-
-  const max = await this.carRepo
-    .createQueryBuilder('car')
-    .select('MAX(car.price)', 'max')
-    .getRawOne();
-
-  return {
-    minPrice: parseInt(min.min),
-    maxPrice: parseInt(max.max),
-  };
-}
-
+  private readCsv(filePath: string): Promise<any[]> {
+    return new Promise((resolve, reject) => {
+      const results: any[] = [];
+      fs.createReadStream(filePath)
+        .pipe(csvParser())
+        .on('data', (data) => results.push(data))
+        .on('end', () => resolve(results))
+        .on('error', (error) => reject(error));
+    });
   }
+
+  async assignDefaultImagesByBrand() {
+    const brandImageMap = {
+      1: 'e87f2473-6c2b-4d55-ac06-0925ee1120dd.webp',
+      2: 'f557a05b-69d3-4753-a8d2-1ab1a6c89256.webp',
+      3: '697d38c9-0aa6-4c1f-a435-5e4d866ca744.webp',
+      4: '449dd01d-7a1b-4e53-9d69-81b763e6de95.webp',
+      5: '1d43b5e6-dca7-4942-87d0-0fb0b8b42615.webp',
+      6: '09ac2ed6-9017-4cab-8fc9-8701bd002571.webp',
+      7: '33a9db78-9092-4281-8702-eb5130abcf98.webp',
+      8: '6a97f6ac-803c-4ff6-b936-11ce65c48592.webp',
+      9: '96638e03-5945-4aaa-991f-8126e5f9b0ac.webp',
+      10: 'a3c3bce9-8b25-4a9d-b37e-6ee13e6d0d48.webp',
+    };
+
+    const allCars = await this.carRepo.find({ relations: ['brand'] });
+
+    const carImages = allCars
+      .map((car) => {
+        const url = brandImageMap[car.brand.id];
+        if (!url) return null;
+
+        return this.carImageRepo.create({
+          car: car,
+          url: url,
+        });
+      })
+      .filter((img): img is CarImage => img !== null);
+
+    await this.carImageRepo.save(carImages);
+
+    console.log(`✅ Added ${carImages.length} car images`);
+  }
+  async setAllImagesToMain(): Promise<void> {
+    await this.carImageRepo
+      .createQueryBuilder()
+      .update(CarImage)
+      .set({ type: 'main' })
+      .execute();
+      console.log('All car images updated to type = main');
+  }
+}
