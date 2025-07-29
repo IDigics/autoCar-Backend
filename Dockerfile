@@ -18,8 +18,8 @@ RUN apk add --no-cache openssl
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
 COPY package*.json ./
-COPY wait-for-db.sh ./
-RUN chmod +x ./wait-for-db.sh
+#COPY wait-for-db.sh ./
+#RUN chmod +x ./wait-for-db.sh
 
 EXPOSE 3000
 CMD ["npm", "run", "start:prod", "--", "--host", "0.0.0.0"]
