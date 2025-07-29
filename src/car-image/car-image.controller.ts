@@ -1,4 +1,4 @@
-/*import {
+import {
   Controller,
   Get,
   Param,
@@ -14,7 +14,7 @@ import { createReadStream, existsSync } from 'fs';
 export class CarImageController {
   constructor(private configService: ConfigService) {}
 
-  @Get(':filename')
+  /*@Get(':filename')
   async serveImage(@Param('filename') filename: string, @Res() res: Response) {
     const uploadFolder = this.configService.get<string>('UPLOAD_FOLDER') || 'uploads/car-images';
     const filePath = join(__dirname, '..', '..', uploadFolder, filename);
@@ -25,6 +25,5 @@ export class CarImageController {
 
     const stream = createReadStream(filePath);
     stream.pipe(res);
-  }
+  }*/
 }
-*/
