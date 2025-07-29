@@ -74,36 +74,35 @@ export class CarController {
 
   
   @Get()
-    @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
-    async getCars(@Query() filters: CarFilterDto) {
-      // Destructure with default values
-      const {
-        brand,
-        minPrice,
-        maxPrice,
-        category,
-        subCategory,
-        fuelType,
-        sort = 'id_asc',
-        page = 1,
-        pageSize = 10,
-        search,
-      } = filters;
+@UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
+async getCars(@Query() filters: CarFilterDto) {
+  const {
+    brand,
+    category,
+    subCategory,
+    fuelType,
+    minPrice,
+    maxPrice,
+    search,
+    sort = 'id_asc',
+    page = 1,
+    pageSize = 10,
+  } = filters;
 
-      // Build filter object dynamically, skipping undefined/null values
-      const filterObject = {
-        ...(brand !== undefined && brand !== null && { brand }),
-        ...(minPrice !== undefined && { minPrice }),
-        ...(maxPrice !== undefined && { maxPrice }),
-        ...(category !== undefined && category !== null && { category }),
-        ...(subCategory !== undefined && subCategory !== null && { subCategory }),
-        ...(fuelType !== undefined && fuelType !== null && { fuelType }),
-        ...(search && { search }),
-      };
+  const filterObject = {
+    brand,
+    category,
+    subCategory,
+    fuelType,
+    minPrice,
+    maxPrice,
+    search,
+  };
 
-      // Call service method with filters, pagination and sorting
-      return this.carService.getCars(filterObject, sort, page, pageSize);
-    }
+  return this.carService.getCars(filterObject, sort, page, pageSize);
+}
+
+
   
 
 }
