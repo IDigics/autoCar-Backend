@@ -1,7 +1,7 @@
 import { BadRequestException, Body, Controller, Delete, Get, NotFoundException, Param, ParseIntPipe, Post, Put, Query, UploadedFile, UploadedFiles, UseInterceptors, UsePipes, ValidationPipe } from '@nestjs/common';
 import { CarService } from './car.service';
 import { CarFilterDto } from './dto/car-filter.dto';
-import {FileFieldsInterceptor,FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
+import {FileFieldsInterceptor } from '@nestjs/platform-express';
 import { CreateCarDto } from './dto/create-car.dto';
 import { UpdateCarDto } from './dto/update-car.dto';
 
