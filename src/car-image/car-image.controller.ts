@@ -1,4 +1,4 @@
-import {
+/*import {
   Controller,
   Get,
   Param,
@@ -27,3 +27,4 @@ export class CarImageController {
     stream.pipe(res);
   }
 }
+*/

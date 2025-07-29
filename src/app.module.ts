@@ -30,7 +30,7 @@ import { ImportModule } from './import/import.module';
       username: config.get<string>('DB_USERNAME'),
       password: config.get<string>('DB_PASSWORD'),
       database: config.get<string>('DB_NAME'),
-      synchronize: true, //in prod it go flase
+      synchronize: config.get<boolean>('SYNCHRONIZE'), //in prod it go flase
       autoLoadEntities: true,
     })
     }),
