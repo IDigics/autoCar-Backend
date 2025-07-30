@@ -33,6 +33,11 @@ services:
       DB_PASSWORD: admin
       DB_NAME: autocar
       SYNCHRONIZE: "false"
+      UPLOAD_FOLDER: uploads
+      ORIGIN: "*"
+    volumes:
+      - ./uploads:/app/uploads  # Maps local uploads to container's /app/uploads
+      - ./:/app
     ports:
       - "3000:3000"
     depends_on:
