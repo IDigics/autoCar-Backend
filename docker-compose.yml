@@ -1,8 +1,9 @@
 version: '3.8'
 
-volumes:  # ← Add this section at root level (not under services)
-  pgdata:  # ← Declare the volume properly
+volumes:
+  pgdata:
     driver: local
+
 services:
   db:
     image: postgres:17.5
@@ -20,8 +21,8 @@ services:
       interval: 2s
       timeout: 5s
       retries: 30
-      start_period: 9s  # Increased retries
-    restart: unless-stopped  # Auto-recover on failure
+      start_period: 9s
+    restart: unless-stopped
 
   backend:
     build: .
@@ -33,16 +34,14 @@ services:
       DB_PASSWORD: admin
       DB_NAME: autocar
       SYNCHRONIZE: "false"
-      UPLOAD_FOLDER: uploads
-      ORIGIN: "*"
-      PORT: 3000
+      UPLOAD_FOLDER: "uploads"
+      ORIGIN: "*" # Change this to your frontend URL
+      PORT: "3000"
     volumes:
-      - ./uploads:/app/uploads  # Maps local uploads to container's /app/uploads
-      - ./:/app
+      - ./uploads:/app/uploads # This maps your local uploads folder to the container
     ports:
       - "3000:3000"
     depends_on:
       db:
         condition: service_healthy
     restart: unless-stopped
-
