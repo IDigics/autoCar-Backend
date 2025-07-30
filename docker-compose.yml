@@ -35,6 +35,7 @@ services:
       SYNCHRONIZE: "false"
       UPLOAD_FOLDER: uploads
       ORIGIN: "*"
+      PORT: 3000
     volumes:
       - ./uploads:/app/uploads  # Maps local uploads to container's /app/uploads
       - ./:/app
