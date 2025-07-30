@@ -2,11 +2,11 @@ import { Controller, Post, Get, Param, Body, Query, ParseIntPipe, UsePipes, Vali
 import { ReviewService } from './review.service';
 import { CreateReviewDto } from './dto/review.dto';
 
-@Controller('cars/:carId/reviews')
+@Controller('cars/reviews')
 export class ReviewController {
   constructor(private readonly reviewService: ReviewService) {}
 
-  @Post()
+  @Post(':carId')
   @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
   async createReview(
     @Param('carId', ParseIntPipe) carId: number,
