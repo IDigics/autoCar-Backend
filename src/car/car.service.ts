@@ -32,57 +32,60 @@ export class CarService {
     private imageService: CarImageService,
   ) {}
 
-  async getCars(filters: Record<string, any>,sort: string,page: number,pageSize = 10,) {
-        
+  async getCars(
+    filters: Record<string, any>,
+    sort: string,
+    page: number,
+    pageSize = 10,
+  ) {
     if (isNaN(page) || page < 1) {
-          throw new BadRequestException('Page must be a positive number.');
-        }
+      throw new BadRequestException('Page must be a positive number.');
+    }
 
     if (isNaN(pageSize) || pageSize < 1 || pageSize > 100) {
-          throw new BadRequestException('Page size must be between 1 and 100.');
-        }
+      throw new BadRequestException('Page size must be between 1 and 100.');
+    }
 
     let where, order;
-
     try {
-          where = this.buildWhere(filters);
-          order = this.buildSort(sort);
+      where = this.buildWhere(filters);
+      order = this.buildSort(sort);
     } catch (err) {
-          throw new BadRequestException(err.message || 'Invalid filter or sort');
-        }
+      throw new BadRequestException(err.message || 'Invalid filter or sort');
+    }
 
     const [cars, totalCount] = await this.carRepo.findAndCount({
-          where,
-          order,
-          take: pageSize,
-          skip: (page - 1) * pageSize,
-          relations: ['brand', 'fuelType', 'images'],
+      where,
+      order,
+      take: pageSize,
+      skip: (page - 1) * pageSize,
+      relations: ['brand', 'fuelType', 'images'],
     });
 
-    const simplifiedCars = cars.map((car) => {
-          const mainImage = car.images.find((img) => img.type === 'main');
+    const simplifiedCars = cars.map(car => {
+      const mainImage = car.images.find(img => img.type === 'main');
 
       return {
-            id: car.id,
-            brand: car.brand?.name,
-            model: car.model,
-            fuelType: car.fuelType?.type,
-            offerType: car.offerType,
-            price: car.price,
-            year: car.year,
-            color: car.color,
-            rating: car.averageReviewScore,
-            image: mainImage?.url || null,
+        id: car.id,
+        brand: car.brand?.name,
+        model: car.model,
+        fuelType: car.fuelType?.type,
+        offerType: car.offerType,
+        price: car.price,
+        year: car.year,
+        color: car.color,
+        rating: car.averageReviewScore,
+        image: mainImage?.url || null,
       };
     });
 
     return {
-          cars: simplifiedCars,
-          metadata: {
-            totalCount,
-            page,
-            pageSize,
-          },
+      cars: simplifiedCars,
+      metadata: {
+        totalCount,
+        page,
+        pageSize,
+      },
     };
   }
 
@@ -235,47 +238,55 @@ export class CarService {
   }
 
   private buildWhere(filters: Record<string, any>) {
-    const allowedFilters = [
-      'brand', 'category', 'subCategory', 'fuelType', 
-      'minPrice', 'maxPrice', 'search'
-    ];
-    for (const key of Object.keys(filters)) {
-      if (!allowedFilters.includes(key)) {
-        throw new BadRequestException(`Unknown filter: '${key}'`);
-      }
+  const allowedFilters = [
+    'brand',
+    'category',
+    'subCategory',
+    'fuelType',
+    'minPrice',
+    'maxPrice',
+    'search',
+  ];
+  for (const key of Object.keys(filters)) {
+    if (!allowedFilters.includes(key)) {
+      throw new BadRequestException(`Unknown filter: '${key}'`);
     }
-    const where: Record<string, any> = {};
-    const isValidId = (val: any) => !isNaN(val) && Number(val) > 0;
-
-    if (isValidId(filters.brand)) where.brand = { id: filters.brand };
-    if (isValidId(filters.category)) where.category = { id: filters.category };
-    if (isValidId(filters.subCategory)) where.subCategory = { id: filters.subCategory };
-    if (isValidId(filters.fuelType)) where.fuelType = { id: filters.fuelType };
-
-    if (filters.minPrice !== undefined && filters.maxPrice !== undefined) {
-      where.price = Between(Number(filters.minPrice), Number(filters.maxPrice));
-    } else if (filters.minPrice !== undefined) {
-      where.price = MoreThanOrEqual(Number(filters.minPrice));
-    } else if (filters.maxPrice !== undefined) {
-      where.price = LessThanOrEqual(Number(filters.maxPrice));
-    }
-
-    if (filters.search) {
-      const search = `%${filters.search}%`;
-
-      try {
-        return [
-          { ...where, model: ILike(search) },
-          { ...where, brand: { ...where.brand, name: ILike(search) } },
-          { ...where, category: { ...where.category, name: ILike(search) } },
-        ];
-      } catch (err) {
-        throw new Error('Invalid search parameters');
-      }
-    }
-
-    return where;
   }
+
+  const where: Record<string, any> = {};
+
+  if (filters.brand && filters.brand.length > 0) {
+    where.brand = filters.brand.length === 1 ? { id: filters.brand[0] } : In(filters.brand);
+  }
+  if (filters.category && filters.category.length > 0) {
+    where.category = filters.category.length === 1 ? { id: filters.category[0] } : In(filters.category);
+  }
+  if (filters.subCategory && filters.subCategory.length > 0) {
+    where.subCategory = filters.subCategory.length === 1 ? { id: filters.subCategory[0] } : In(filters.subCategory);
+  }
+  if (filters.fuelType && filters.fuelType.length > 0) {
+    where.fuelType = filters.fuelType.length === 1 ? { id: filters.fuelType[0] } : In(filters.fuelType);
+  }
+
+  if (filters.minPrice !== undefined && filters.maxPrice !== undefined) {
+    where.price = Between(Number(filters.minPrice), Number(filters.maxPrice));
+  } else if (filters.minPrice !== undefined) {
+    where.price = MoreThanOrEqual(Number(filters.minPrice));
+  } else if (filters.maxPrice !== undefined) {
+    where.price = LessThanOrEqual(Number(filters.maxPrice));
+  }
+
+  if (filters.search) {
+    const search = `%${filters.search}%`;
+    return [
+      { ...where, model: ILike(search) },
+      { ...where, brand: { ...where.brand, name: ILike(search) } },
+      { ...where, category: { ...where.category, name: ILike(search) } },
+    ];
+  }
+
+  return where;
+}
 
   private buildSort(sort: string): { [P in keyof Car]?: 'ASC' | 'DESC' } {
     const validSorts = [
@@ -357,4 +368,6 @@ export class CarService {
   car.averageReviewScore = parseFloat(avgScore.toFixed(2));
   await this.carRepo.save(car);
 }
+
+
 }
