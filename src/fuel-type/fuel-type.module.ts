@@ -8,5 +8,6 @@ import { FuelTypeController } from './fuel-type.controller';
   imports: [TypeOrmModule.forFeature([FuelType])],
   providers: [FuelTypeService],
   controllers: [FuelTypeController],
+  exports: [FuelTypeService],
 })
 export class FuelTypeModule {}
