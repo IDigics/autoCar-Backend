@@ -11,11 +11,12 @@ jobs:
       - uses: actions/checkout@v4
       - name: Build and Push Docker Image
         run: |
-          docker build -t 192.168.10.20:5000/nestjs-app:$GITHUB_SHA .
-          docker push 192.168.10.20:5000/nestjs-app:$GITHUB_SHA
+          TIMESTAMP=$(date +%Y%m%d%H%M%S)
+          docker build -t 192.168.10.20:5000/nestjs-app:$TIMESTAMP .
+          docker push 192.168.10.20:5000/nestjs-app:$TIMESTAMP
       - name: Trigger Ansible
         run: |
           cd ~/ansible
           ansible-playbook playbook-backend.yml -i inventory.ini \
-            --extra-vars "target_host=192.168.10.30 image_tag=$GITHUB_SHA" \
+            --extra-vars "target_host=192.168.10.30 image_tag=$TIMESTAMP" \
             --ask-become-pass  # Password prompt for sudo
