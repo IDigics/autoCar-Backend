@@ -1,8 +1,8 @@
 name: Deploy Backend
 
 on:
-  #push:
-    #branches: [ preProduction ]
+  push:
+    branches: [ preProduction ]
 
 jobs:
   build-and-deploy:
