@@ -20,6 +20,6 @@ jobs:
 
       - name: Trigger Ansible
         run: |
-          ansible-playbook playbook-backend.yml -i inventory.ini \
+          ansible-playbook ~/ansible/playbook-backend.yml -i inventory.ini \
             --extra-vars "image_tag=$TIMESTAMP" \
             --ask-become-pass  # Password prompt for sudo
