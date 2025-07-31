@@ -21,7 +21,7 @@ export class Car {
   @Column()
   mileage: number;  
 
-  @ManyToOne(() => Brand, (brand) => brand.cars, { eager: true })
+ @ManyToOne(() => Brand, (brand) => brand.cars, { eager: true, onDelete: 'CASCADE' })
   brand: Brand;
 
   @Column()
