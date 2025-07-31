@@ -12,7 +12,6 @@ jobs:
       
       - name: Prepare database initialization files
         run: |
-          ls -la ~/ansible/initdb/
           rm -rf ~/ansible/initdb
           mkdir -p ~/ansible/initdb/
           ls -la ~/ansible/initdb/
