@@ -14,7 +14,9 @@ jobs:
         run: |
           cd ~/ansible
           rm -rf /initdb
+          ls -la ~/ansible/initdb/
           mkdir -p ~/ansible/initdb
+          ls -la ~/ansible/initdb/
           find initdb/ -name "*.sql" -exec cp {} ~/ansible/initdb/ \;
           echo "Copied these SQL files:"
           ls -la ~/ansible/initdb/
