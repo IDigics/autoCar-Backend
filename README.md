@@ -38,7 +38,7 @@ or u can use detached mode whitout seeing evry thing in terminal
 docker-compose up --build -d
 ```
 
-and if want to delete the containers just use the :
+and if want to delete the containers just use this :
 
 
 ```bash
