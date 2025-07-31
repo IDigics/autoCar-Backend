@@ -12,6 +12,8 @@ jobs:
       
       - name: Prepare database initialization files
         run: |
+          cd ~/ansible
+          rm -rf /initdb
           mkdir -p ~/ansible/initdb
           find initdb/ -name "*.sql" -exec cp {} ~/ansible/initdb/ \;
           echo "Copied these SQL files:"
