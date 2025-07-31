@@ -12,13 +12,14 @@ jobs:
       - name: Build and Push Docker Image
         run: |
           TIMESTAMP=$(date +%Y%m%d%H%M%S)
+          
           docker build -t 192.168.10.20:5000/nestjs-app:$TIMESTAMP .
           docker push 192.168.10.20:5000/nestjs-app:$TIMESTAMP
+          
           echo "IMAGE_TAG=$TIMESTAMP" >> $GITHUB_ENV
 
       - name: Trigger Ansible
         run: |
-          cd ~/ansible
           ansible-playbook playbook-backend.yml -i inventory.ini \
-            --extra-vars "target_host=192.168.10.30 image_tag=$TIMESTAMP" \
+            --extra-vars "image_tag=$TIMESTAMP" \
             --ask-become-pass  # Password prompt for sudo
