@@ -12,11 +12,13 @@ async function bootstrap() {
     credentials: true,
   });
 
-  const uploadFolder = process.env.UPLOAD_FOLDER || '/app/uploads';
-  app.useStaticAssets(join(__dirname, '..', uploadFolder), {
-    prefix: '/image/',
-  });
-
+  //const uploadFolder = process.env.UPLOAD_FOLDER || '/app/uploads';
+  //app.useStaticAssets(join(__dirname, '..', uploadFolder), {
+   // prefix: '/image/',
+ // });
+app.use('/image', express.static('/app/uploads', {
+  redirect: false  // Prevent automatic redirects
+}));
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();
