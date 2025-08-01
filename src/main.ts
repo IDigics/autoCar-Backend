@@ -12,7 +12,7 @@ async function bootstrap() {
     credentials: true,
   });
 
-  const uploadFolder = process.env.UPLOAD_FOLDER || 'uploads';
+  const uploadFolder = process.env.UPLOAD_FOLDER || '/app/uploads';
   app.useStaticAssets(join(__dirname, '..', uploadFolder), {
     prefix: '/image/',
   });
