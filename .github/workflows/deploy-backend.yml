@@ -18,6 +18,13 @@ jobs:
           find initdb/ -name "*.sql" -exec cp {} ~/ansible/initdb/ \;
           echo "Copied these SQL files:"
           ls -la ~/ansible/initdb/
+          mkdir -p ~/ansible/uploads
+          # Copy all files from repo's uploads folder
+          if [ -d "./uploads" ]; then
+             cp -r ./uploads/* ~/ansible/uploads/
+          fi
+          echo "Copied these files:"
+          ls -la ~/ansible/uploads
           #mkdir -p ~/ansible/initdb
           #cp initdb/mydb_export.sql ~/ansible/initdb/
           #ls -la ~/ansible/initdb/    
