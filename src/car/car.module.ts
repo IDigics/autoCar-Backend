@@ -10,10 +10,11 @@ import { CarImage } from 'src/car-image/car-image.entity';
 import { Review } from 'src/review/review.entity';
 import { Brand } from 'src/brand/brand.entity';
 import { CarImageService } from 'src/car-image/car-image.service';
+import { RecommendationModule } from 'src/recommendation/recommendation.module';
 
 
 @Module({
-imports: [TypeOrmModule.forFeature([Car,Category,SubCategory,FuelType,CarImage,Brand,Review,])],
+imports: [TypeOrmModule.forFeature([Car,Category,SubCategory,FuelType,CarImage,Brand,Review,]), RecommendationModule],
   providers: [CarService,CarImageService],
   controllers: [CarController],
   exports: [CarService],

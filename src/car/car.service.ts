@@ -14,6 +14,7 @@ import { Review } from 'src/review/review.entity';
 
 
 import { CarImageService } from '../car-image/car-image.service';
+import { RecommendationService } from 'src/recommendation/recommendation.service';
 
 import { CreateCarDto } from './dto/create-car.dto';
 import { UpdateCarDto } from './dto/update-car.dto';
@@ -27,8 +28,8 @@ export class CarService {
     @InjectRepository(SubCategory) private subCategoryRepo: Repository<SubCategory>,
     @InjectRepository(FuelType) private fuelRepo: Repository<FuelType>,
     @InjectRepository(CarImage) private imageRepo: Repository<CarImage>,
-    @InjectRepository(Review) private reviewRepo: Repository<Review>,  // <-- Add this line
-
+    @InjectRepository(Review) private reviewRepo: Repository<Review>, 
+    private readonly recommendationService: RecommendationService,
     private imageService: CarImageService,
   ) {}
 
@@ -155,6 +156,7 @@ export class CarService {
     });
 
   await this.carRepo.save(car);
+  await this.recommendationService.clearAllRecommendations();
   }
 
   async updateCar(id: number,dto: UpdateCarDto,mainImageFile?: Express.Multer.File,secondaryImageFiles?: Express.Multer.File[],) {
@@ -212,7 +214,7 @@ export class CarService {
         });
         await this.imageRepo.save(newMain);
       }
-
+      await this.recommendationService.clearAllRecommendations();
       return {message: 'Car updated successfully'};
 }
 
@@ -235,6 +237,8 @@ export class CarService {
 
       // Delete the car itself
       await this.carRepo.delete(id);
+      await this.recommendationService.clearAllRecommendations();
+
   }
 
   private buildWhere(filters: Record<string, any>) {
