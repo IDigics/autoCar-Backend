@@ -44,4 +44,16 @@ export class CarImageService {
 
     return filenames;
   }
+  async deleteImage(filename: string): Promise<void> {
+  const filepath = path.join(this.uploadFolder, filename);
+  try {
+    await fs.unlink(filepath);
+  } catch (error) {
+    // If file doesn't exist, ignore error
+    if (error.code !== 'ENOENT') {
+      throw error; // rethrow other errors
+    }
+  }
+}
+
 }

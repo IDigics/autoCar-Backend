@@ -16,6 +16,7 @@ import { ReviewModule } from './review/review.module';
 import { RecommendationModule } from './recommendation/recommendation.module';
 import { RecommendedCarModule } from './recommended-car/recommended-car.module';
 import { ImportModule } from './import/import.module';
+import { FilterDataModule } from './filter-data/filter-data.module';
 
 @Module({
   imports: [ 
@@ -43,7 +44,7 @@ import { ImportModule } from './import/import.module';
     ReviewModule, 
     RecommendationModule, 
     RecommendedCarModule, 
-    ImportModule,
+    ImportModule, FilterDataModule,
   ],
   controllers: [AppController],
   providers: [AppService],

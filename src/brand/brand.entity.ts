@@ -9,6 +9,9 @@ export class Brand {
   @Column({ unique: true })
   name: string;
 
+  @Column({ nullable: true })
+  logo: string;
+
   @OneToMany(() => Car, (car) => car.brand)
   cars: Car[];
 }
