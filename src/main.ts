@@ -11,7 +11,7 @@ async function bootstrap() {
     methods: 'GET,POST,PUT,PATCH,DELETE',
     credentials: true,
   });
-onst uploadFolder = process.env.UPLOAD_FOLDER || '/app/uploads';
+const uploadFolder = process.env.UPLOAD_FOLDER || '/app/uploads';
   app.useStaticAssets(join(__dirname, '..', uploadFolder), {
    prefix: '/image/',
  });
