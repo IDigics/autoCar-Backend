@@ -7,7 +7,7 @@ import { CarImageController } from './car-image.controller';
 @Module({
   imports: [TypeOrmModule.forFeature([CarImage])],
   providers: [CarImageService],
-  exports: [TypeOrmModule],
+  exports: [TypeOrmModule,CarImageService],
   controllers: [CarImageController],
 })
 export class CarImageModule {}

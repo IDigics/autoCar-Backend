@@ -21,13 +21,13 @@ export class Car {
   @Column()
   mileage: number;  
 
-  @ManyToOne(() => Brand, (brand) => brand.cars, { eager: true })
+ @ManyToOne(() => Brand, (brand) => brand.cars, {eager: true,nullable: true,onDelete: 'SET NULL',})
   brand: Brand;
 
   @Column()
   model: string;
 
-  @ManyToOne(() => FuelType, (fuel) => fuel.cars, { eager: true })
+  @ManyToOne(() => FuelType, (fuel) => fuel.cars, {eager: true,nullable: true,onDelete: 'SET NULL',})
   fuelType: FuelType;
 
   @Column({ type: 'enum', enum: ['Automatic', 'Manual'],default:'Manual'})
@@ -64,10 +64,10 @@ export class Car {
   averageReviewScore: number;
 
 
-  @ManyToOne(() => Category, (cat) => cat.cars, { eager: true })
+  @ManyToOne(() => Category, (cat) => cat.cars, {eager: true,nullable: true,onDelete: 'SET NULL',})
   category: Category;
 
-  @ManyToOne(() => SubCategory, (sub) => sub.cars, { eager: true })
+  @ManyToOne(() => SubCategory, (sub) => sub.cars, {eager: true,nullable: true,onDelete: 'SET NULL',})
   subCategory: SubCategory;
 
   @OneToMany(() => CarImage, (image) => image.car, { cascade: true })

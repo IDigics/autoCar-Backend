@@ -1,4 +1,4 @@
-import { IsOptional, IsNumber, IsArray, ArrayNotEmpty, IsString, IsIn } from 'class-validator';
+import { IsOptional, IsNumber, IsArray, ArrayNotEmpty, IsString, IsIn, Min, Max } from 'class-validator';
 import { Transform, Type } from 'class-transformer';
 
 function parseCommaSeparatedNumbers(value: any): number[] | undefined {
@@ -16,67 +16,33 @@ function parseCommaSeparatedNumbers(value: any): number[] | undefined {
 }
 
 export class CarFilterDto {
-  @IsOptional()
-  @IsArray()
-  @ArrayNotEmpty()
-  @IsNumber({}, { each: true })
-  @Transform(({ value }) => parseCommaSeparatedNumbers(value))
+  @IsOptional()@IsArray()@ArrayNotEmpty()@IsNumber({}, { each: true })@Transform(({ value }) => parseCommaSeparatedNumbers(value))
   brand?: number[];
 
-  @IsOptional()
-  @IsArray()
-  @ArrayNotEmpty()
-  @IsNumber({}, { each: true })
-  @Transform(({ value }) => parseCommaSeparatedNumbers(value))
+  @IsOptional()@IsArray()@ArrayNotEmpty()@IsNumber({}, { each: true })@Transform(({ value }) => parseCommaSeparatedNumbers(value))
   category?: number[];
 
-  @IsOptional()
-  @IsArray()
-  @ArrayNotEmpty()
-  @IsNumber({}, { each: true })
-  @Transform(({ value }) => parseCommaSeparatedNumbers(value))
+  @IsOptional()@IsArray()@ArrayNotEmpty()@IsNumber({}, { each: true })@Transform(({ value }) => parseCommaSeparatedNumbers(value))
   subCategory?: number[];
 
-  @IsOptional()
-  @IsArray()
-  @ArrayNotEmpty()
-  @IsNumber({}, { each: true })
-  @Transform(({ value }) => parseCommaSeparatedNumbers(value))
+  @IsOptional()@IsArray()@ArrayNotEmpty()@IsNumber({}, { each: true })@Transform(({ value }) => parseCommaSeparatedNumbers(value))
   fuelType?: number[];
 
-  @IsOptional()
-  @Type(() => Number)
-  @IsNumber()
+  @IsOptional()@Type(() => Number)@IsNumber()
   minPrice?: number;
 
-  @IsOptional()
-  @Type(() => Number)
-  @IsNumber()
+  @IsOptional()@Type(() => Number)@IsNumber()
   maxPrice?: number;
 
-  @IsOptional()
-  @IsString()
+  @IsOptional()@IsString()
   search?: string;
 
-  @IsOptional()
-  @IsIn([
-    'id_asc',
-    'price_asc',
-    'price_desc',
-    'year_asc',
-    'year_desc',
-    'review_asc',
-    'review_desc',
-  ])
+  @IsOptional()@IsIn(['id_asc','price_asc','price_desc','year_asc','year_desc','review_asc','review_desc',])
   sort?: string;
 
-  @IsOptional()
-  @Type(() => Number)
-  @IsNumber()
+  @IsOptional()@Type(() => Number)@IsNumber()@Min(1)
   page?: number;
 
-  @IsOptional()
-  @Type(() => Number)
-  @IsNumber()
+  @IsOptional()@Type(() => Number)@IsNumber()@Min(1)@Max(100)
   pageSize?: number;
 }
